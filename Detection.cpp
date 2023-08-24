@@ -12,12 +12,8 @@ std::vector<Plane> PlaneSegmentation::DetectMultiPlanes(open3d::geometry::PointC
 	auto target = pcd;
 
 	int count = 0;
-	int t = 0;
-
-	std::cout << "Girdi \n";
 
 	while (count < (1 - min_ratio) * size) {
-		std::cout << t << "\n";
 		std::tuple<Eigen::Vector4d, std::vector<size_t>> plane = PlaneRegression(target, threshold=threshold, 3, iterations);
 		Plane planeObj;
 		Eigen::Vector4d plane_eq = std::get<0>(plane);
@@ -25,10 +21,8 @@ std::vector<Plane> PlaneSegmentation::DetectMultiPlanes(open3d::geometry::PointC
 
 		planeObj.equation = plane_eq;
 		planeObj.point_index = index;
-		// planeObj.center =
 		
 		count += (int)index.size();
-		t++;
 
 		auto res = RemoveGivenPointSet(target, index);
 		target = res.first;
@@ -36,7 +30,7 @@ std::vector<Plane> PlaneSegmentation::DetectMultiPlanes(open3d::geometry::PointC
 
 		plane_list.push_back(planeObj);
 
-		open3d::io::WritePointCloudToPLY("output_" + std::to_string(t) + ".ply", target, open3d::io::WritePointCloudOption());
+		// open3d::io::WritePointCloudToPLY("output_" + std::to_string(t) + ".ply", target, open3d::io::WritePointCloudOption());
 	}
 	return plane_list;
 }
@@ -52,10 +46,8 @@ std::pair<open3d::geometry::PointCloud, Eigen::Vector3d> PlaneSegmentation::Remo
 	double avg_x = 0, avg_y = 0, avg_z = 0;
 	int sz = 0;
 
-
-	
 	for (size_t i = 0; i < pcd.points_.size(); i++) {
-		if (std::find(index_set.begin(), index_set.end(), i) != index_set.end()) {
+		if (std::find(index_set.begin(), index_set.end(), i) == index_set.end()) {
 			tmp_points.push_back(pcd.points_[i]);
 			if (pcd.HasNormals())
 				tmp_normals.push_back(pcd.normals_[i]);
