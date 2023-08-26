@@ -10,8 +10,8 @@ std::vector<Plane> PlaneSegmentation::DetectMultiPlanes(open3d::geometry::PointC
 	std::vector<Plane> plane_list;
 	int size = (int)pcd.points_.size();
 	auto target = pcd;
-
 	int count = 0;
+
 
 	while (count < (1 - min_ratio) * size) {
 		std::tuple<Eigen::Vector4d, std::vector<size_t>> plane = PlaneRegression(target, threshold=threshold, 3, iterations);
@@ -29,8 +29,6 @@ std::vector<Plane> PlaneSegmentation::DetectMultiPlanes(open3d::geometry::PointC
 		planeObj.center = res.second;
 
 		plane_list.push_back(planeObj);
-
-		// open3d::io::WritePointCloudToPLY("output_" + std::to_string(t) + ".ply", target, open3d::io::WritePointCloudOption());
 	}
 	return plane_list;
 }
@@ -38,13 +36,18 @@ std::vector<Plane> PlaneSegmentation::DetectMultiPlanes(open3d::geometry::PointC
 
 std::pair<open3d::geometry::PointCloud, Eigen::Vector3d> PlaneSegmentation::RemoveGivenPointSet(open3d::geometry::PointCloud& pcd, std::vector<size_t> index_set)
 {
-	std::vector<Eigen::Vector3d> tmp_points;
-	std::vector<Eigen::Vector3d> tmp_normals;
-	std::vector<Eigen::Vector3d> tmp_colors;
-	std::vector<Eigen::Matrix3d> tmp_covariances;
+	std::vector<Eigen::Vector3d> tmp_points; tmp_points.reserve(pcd.points_.size() - index_set.size());
+	std::vector<Eigen::Vector3d> tmp_normals; tmp_normals.reserve(pcd.points_.size() - index_set.size());
+	std::vector<Eigen::Vector3d> tmp_colors; tmp_colors.reserve(pcd.points_.size() - index_set.size());
+	std::vector<Eigen::Matrix3d> tmp_covariances; tmp_covariances.reserve(pcd.points_.size() - index_set.size());
+
+	if (index_set.size() == 0) {
+		std::cout << "Set shouldn't be empty!" << std::endl;
+		return std::make_pair(pcd, Eigen::Vector3d::Identity());
+	}
 
 	double avg_x = 0, avg_y = 0, avg_z = 0;
-	int sz = 0;
+
 
 	for (size_t i = 0; i < pcd.points_.size(); i++) {
 		if (std::find(index_set.begin(), index_set.end(), i) == index_set.end()) {
@@ -57,7 +60,6 @@ std::pair<open3d::geometry::PointCloud, Eigen::Vector3d> PlaneSegmentation::Remo
 				tmp_covariances.push_back(pcd.covariances_[i]);
 		}
 		else {
-			sz++;
 			avg_x += pcd.points_[i].x();
 			avg_y += pcd.points_[i].y();
 			avg_z += pcd.points_[i].z();
@@ -69,5 +71,5 @@ std::pair<open3d::geometry::PointCloud, Eigen::Vector3d> PlaneSegmentation::Remo
 	pcd.colors_ = tmp_colors;
 	pcd.covariances_ = tmp_covariances;
 
-	return std::make_pair(pcd, Eigen::Vector3d(avg_x / sz, avg_y / sz, avg_z / sz));
+	return std::make_pair(pcd, Eigen::Vector3d(avg_x / index_set.size(), avg_y / index_set.size(), avg_z / index_set.size()));
 }
