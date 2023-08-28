@@ -11,5 +11,5 @@ A fast and simple method for multi-plane detection from point clouds using itera
 You can use PlaneSegmentation class to obtain planes.
 
 ## Results
-<img src="data/result1.jpg" width="800">
-<img src="data/result2.jpg" width="800">
+<img src="data/result1.png" width="800">
+<img src="data/result2.png" width="800">
