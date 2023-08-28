@@ -8,7 +8,10 @@ A fast and simple method for multi-plane detection from point clouds using itera
 
 ## Usage
 
-You can use PlaneSegmentation class to obtain planes.
+- You can use PlaneSegmentation class to obtain planes.
+
+## Notes
+- This repo is a C++ translation of https://github.com/yuecideng/Multiple_Planes_Detection.
 
 ## Results
 <img src="data/result1.png" width="800">
